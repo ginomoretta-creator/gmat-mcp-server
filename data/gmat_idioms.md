@@ -134,5 +134,10 @@ This is the "idiom prompt" knowledge asset: feed it to the model so it stops gue
   "drift rate" over a fraction of an orbit reports the oscillation slope, not the secular drift
   (saw a spurious 138 km/day that was really ~3.7 km/day). Compare same-phase points >=1 orbit apart.
 
+## Scripts must be pure ASCII (even comments)
+- GMAT rejects the whole script if ANY character is non-ASCII — including accented letters
+  in comments (*"contains characters outside of the ASCII character set"*). Caught by writing
+  a Spanish comment with an accent. Strip/transliterate before running.
+
 ## Output location
 - `ReportFile` output is written to `<GMAT>\output\`, not the script directory.
