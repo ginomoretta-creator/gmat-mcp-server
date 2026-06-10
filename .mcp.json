@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "gmat-docs": {
+      "type": "stdio",
+      "command": "pnpm",
+      "args": [
+        "start"
+      ],
+      "env": {}
+    }
+  }
+}

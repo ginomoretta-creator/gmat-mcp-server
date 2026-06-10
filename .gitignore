@@ -1,0 +1,21 @@
+node_modules
+.env
+.env.local
+dist
+*.log
+.cache
+.gmat-docs-mcp
+~/.gmat-docs-mcp
+*.tmp
+*.temp
+.DS_Store
+
+# Keep embeddings.json in the repository for easy deployment
+# cache/
+
+# Local embedding model cache (downloaded on first run) and embedding backups
+data/models/
+*.bak.json
+
+# pnpm is the canonical package manager (pnpm-lock.yaml)
+package-lock.json
