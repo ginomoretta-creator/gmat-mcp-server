@@ -80,7 +80,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "listGmatSamples",
-        description: "List the available known-good NASA GMAT sample scripts (file names). Use as a retrieval corpus of working patterns per mission type.",
+        description: "List the available known-good GMAT sample scripts: NASA's official samples plus a locally validated community corpus (real-mission scripts harvested from public repos that pass a headless run; prefixed 'community/'). Use as a retrieval corpus of working patterns per mission type.",
         inputSchema: { type: "object", properties: {} }
       },
       {
@@ -88,7 +88,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description: "Return the full text of one NASA sample script by file name (from listGmatSamples). Use as a known-good template to seed a phase.",
         inputSchema: {
           type: "object",
-          properties: { name: { type: "string", description: "Sample file name, e.g. 'Ex_SafetyEllipse.script'." } },
+          properties: { name: { type: "string", description: "Sample file name, e.g. 'Ex_SafetyEllipse.script' or 'community/daniestevez__jupyter_notebooks__tcm3.script'." } },
           required: ["name"]
         }
       }

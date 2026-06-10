@@ -4,7 +4,7 @@ An MCP (Model Context Protocol) server that turns [NASA's GMAT](https://gmat.atl
 
 - **`runGmat` — the validation loop.** Runs a GMAT mission script headless via `GmatConsole` and returns a classified outcome (`completed | parse | convergence | run`) with extracted errors and report-file contents. The agent writes a script, runs it, reads what broke, and fixes it — the same loop a mission designer uses.
 - **`getGmatIdioms` — curated knowledge.** A hand-built knowledge base of GMAT gotchas discovered through that loop (cumulative `ElapsedSecs`, no parentheses in conditionals, `Propagate Synchronized` for two-spacecraft burns, …), so the agent stops making the classic mistakes.
-- **`listGmatSamples` / `getGmatSample` — known-good templates.** The NASA sample-script corpus as a retrieval source for vetted mission patterns.
+- **`listGmatSamples` / `getGmatSample` — known-good templates.** The NASA sample-script corpus as a retrieval source for vetted mission patterns, plus an optional local corpus of community scripts (harvested from public repos, kept only if they pass a headless `runGmat` validation; listed with a `community/` prefix). The harvested corpus stays local — it is gitignored because licenses vary.
 - **`searchDocs` — semantic search over the GMAT documentation**, embedded locally and cached in `data/embeddings.json`.
 
 Example of what this enables: asked for a two-burn phasing rendezvous (700 km circular orbit, 30° separation), the agent derived the textbook solution, verified it exactly under two-body dynamics, *discovered it misses by 47 km under J2 gravity* by actually running it, and re-targeted the burns with GMAT's differential corrector to converge at 2.96 km — autonomously, in a handful of tool calls.

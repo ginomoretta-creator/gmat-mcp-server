@@ -21,6 +21,7 @@ interface GmatConfig {
   gmatConsole: string | null;
   gmatOutput: string | null;
   samplesDir: string | null;
+  extraSamplesDir: string;
   idiomsPath: string;
 }
 
@@ -39,6 +40,11 @@ function getConfig(): GmatConfig {
     gmatOutput: gmatBin ? path.join(gmatBin, '..', 'output') : null,
     samplesDir:
       process.env.GMAT_SAMPLES || (gmatBin ? path.join(gmatBin, '..', 'samples') : null),
+    // Locally harvested, runGmat-validated community scripts (mixed licenses: local
+    // retrieval corpus only, never redistributed with the repo).
+    extraSamplesDir:
+      process.env.GMAT_EXTRA_SAMPLES ||
+      path.join(REPO_ROOT, 'data', 'community-scripts', 'validated'),
     idiomsPath: process.env.GMAT_IDIOMS || path.join(REPO_ROOT, 'data', 'gmat_idioms.md'),
   };
   return cachedConfig;
@@ -220,29 +226,36 @@ export function getIdioms(): string {
   }
 }
 
-/** List the available NASA sample .script files (top level of the samples dir). */
-export function listSamples(): string[] {
-  const { samplesDir } = getConfig();
-  if (!samplesDir) return [];
+function listScriptsIn(dir: string | null): string[] {
+  if (!dir) return [];
   try {
-    return fs
-      .readdirSync(samplesDir)
-      .filter((f) => f.toLowerCase().endsWith('.script'))
-      .sort();
+    return fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith('.script'));
   } catch {
     return [];
   }
 }
 
-/** Return the text of one sample script by file name. */
+/** List the available sample .script files: NASA samples plus the validated
+ *  community corpus (harvested scripts that passed a headless runGmat check). */
+export function listSamples(): string[] {
+  const { samplesDir, extraSamplesDir } = getConfig();
+  const nasa = listScriptsIn(samplesDir).sort();
+  const community = listScriptsIn(extraSamplesDir)
+    .sort()
+    .map((f) => `community/${f}`);
+  return [...nasa, ...community];
+}
+
+/** Return the text of one sample script by file name (NASA or community/<name>). */
 export function getSample(name: string): string {
-  const { samplesDir } = getConfig();
-  if (!samplesDir) return `Samples dir not configured. ${SETUP_HINT}`;
+  const { samplesDir, extraSamplesDir } = getConfig();
+  const isCommunity = name.replace(/\\/g, '/').startsWith('community/');
   const safe = path.basename(name);
-  const p = path.join(samplesDir, safe);
+  const dir = isCommunity ? extraSamplesDir : samplesDir;
+  if (!dir) return `Samples dir not configured. ${SETUP_HINT}`;
   try {
-    return fs.readFileSync(p, 'utf8');
+    return fs.readFileSync(path.join(dir, safe), 'utf8');
   } catch {
-    return `Sample not found: ${safe} (looked in ${samplesDir}). Use listGmatSamples to see options.`;
+    return `Sample not found: ${safe} (looked in ${dir}). Use listGmatSamples to see options.`;
   }
 }

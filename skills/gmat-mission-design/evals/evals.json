@@ -1,0 +1,26 @@
+{
+  "skill_name": "gmat-mission-design",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "hohmann-leo-geo",
+      "prompt": "I need a Hohmann transfer from a 400 km circular LEO at 28.5 deg inclination up to GEO (no plane change, just the coplanar transfer). Give me both burns' delta-V, the total, and the final orbit (SMA and ECC) verified in GMAT - not just textbook numbers.",
+      "expected_output": "Two targeted impulsive burns verified in GMAT: dv1 ~2.44 km/s, dv2 ~1.47 km/s, total ~3.91 km/s; final SMA ~42164 km, ECC ~0. Numbers cited from a GMAT report file.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "eval_name": "electric-orbit-raise",
+      "prompt": "Tengo un satelite de 500 kg (450 kg secos + 50 kg de xenon) con un thruster electrico de 0.2 N e Isp 1600 s, en orbita circular de SMA 6878 km, inclinacion 51.6. Necesito subirlo a SMA 6978 km con un finite burn continuo. Verificalo en GMAT y decime: duracion del burn, combustible gastado y SMA final.",
+      "expected_output": "A GMAT finite-burn run with the full EP stack (ElectricTank + ElectricThruster + SolarPowerSystem), targeted BurnTime ~135000-145000 s (~1.6 days), fuel used ~1.7-1.9 kg, final SMA 6978 +/- 1 km, all read from a GMAT report.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "drag-decay-estimate",
+      "prompt": "How long does a 150 kg smallsat (Cd = 2.2, drag area 1.5 m2) take to decay from a 350 km circular orbit down to 200 km altitude? Assume moderate solar activity (F10.7 = 150, magnetic index 3) with the MSISE90 atmosphere. I want the elapsed days verified by an actual GMAT propagation, not a rule-of-thumb estimate.",
+      "expected_output": "A GMAT propagation with MSISE90 drag from 350 km circular until altitude = 200 km, reporting elapsed days (order of tens of days to a few months) from a GMAT report file, with the altitude stop condition handled correctly.",
+      "files": []
+    }
+  ]
+}

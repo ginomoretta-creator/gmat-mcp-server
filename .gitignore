@@ -19,3 +19,6 @@ data/models/
 
 # pnpm is the canonical package manager (pnpm-lock.yaml)
 package-lock.json
+# Skill eval workspaces and harvested community scripts (mixed licenses - do not redistribute)
+skills/*-workspace/
+data/community-scripts/
