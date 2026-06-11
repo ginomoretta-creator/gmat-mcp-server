@@ -235,15 +235,70 @@ function listScriptsIn(dir: string | null): string[] {
   }
 }
 
-/** List the available sample .script files: NASA samples plus the validated
- *  community corpus (harvested scripts that passed a headless runGmat check). */
-export function listSamples(): string[] {
-  const { samplesDir, extraSamplesDir } = getConfig();
-  const nasa = listScriptsIn(samplesDir).sort();
-  const community = listScriptsIn(extraSamplesDir)
+export interface SampleInfo {
+  name: string;
+  features: string[];
+}
+
+// Detect the techniques a script demonstrates, so the agent can pick the right
+// seed for a complex task without opening all ~116 of them. Mirrors the tags
+// in scripts/harvest-corpus.mjs.
+function detectFeatures(text: string): string[] {
+  const f: string[] = [];
+  const has = (re: RegExp) => re.test(text);
+  if (/(?:^|\n)\s*(?:GMAT\s+)?Target\s/.test(text)) f.push('targeting');
+  if (/(?:^|\n)\s*(?:GMAT\s+)?Optimize\s/.test(text)) f.push('optimization');
+  if (has(/BeginFiniteBurn/)) f.push('finite-burn');
+  if (has(/Create\s+ImpulsiveBurn/)) f.push('impulsive');
+  if (has(/ElectricThruster/)) f.push('electric-prop');
+  if (has(/BatchEstimator|ExtendedKalmanFilter|Smoother|Simulator|TrackingFileSet/)) f.push('OD/estimation');
+  if (has(/AtmosphereModel\s*=\s*(?!None)\w/)) f.push('drag');
+  if (has(/\bLuna\b/)) f.push('Moon');
+  if (has(/\bMars\b/)) f.push('Mars');
+  if (has(/\bVenus\b|\bJupiter\b|\bSaturn\b/)) f.push('interplanetary');
+  if (has(/BdotT|BdotR/)) f.push('B-plane');
+  if (has(/LibrationPoint|\bL1\b|\bL2\b/)) f.push('libration-point');
+  if (has(/Formation|RelativeState/)) f.push('formation');
+  if (/(?:^|\n)\s*(?:GMAT\s+)?While\s/.test(text)) f.push('loops');
+  if (has(/EphemerisFile|Code500|STKEphem|\.oem|SPK/i)) f.push('ephemeris');
+  if (has(/Attitude\s*=|SpiceAttitude|NadirPointing/)) f.push('attitude');
+  return f;
+}
+
+function readDirSamples(dir: string | null, prefix: string): SampleInfo[] {
+  if (!dir) return [];
+  return listScriptsIn(dir)
     .sort()
-    .map((f) => `community/${f}`);
-  return [...nasa, ...community];
+    .map((f) => {
+      let features: string[] = [];
+      try {
+        features = detectFeatures(fs.readFileSync(path.join(dir, f), 'utf8'));
+      } catch {
+        /* unreadable -> no tags */
+      }
+      return { name: `${prefix}${f}`, features };
+    });
+}
+
+// Built once per server process (reads ~116 small files); cheap and avoids
+// re-scanning on every listGmatSamples call.
+let sampleIndexCache: SampleInfo[] | null = null;
+
+/** List samples with detected technique tags: NASA samples plus the validated
+ *  community corpus (harvested scripts that passed a headless runGmat check). */
+export function listSamplesDetailed(): SampleInfo[] {
+  if (sampleIndexCache) return sampleIndexCache;
+  const { samplesDir, extraSamplesDir } = getConfig();
+  sampleIndexCache = [
+    ...readDirSamples(samplesDir, ''),
+    ...readDirSamples(extraSamplesDir, 'community/'),
+  ];
+  return sampleIndexCache;
+}
+
+/** List the available sample .script file names (NASA + community/). */
+export function listSamples(): string[] {
+  return listSamplesDetailed().map((s) => s.name);
 }
 
 /** Return the text of one sample script by file name (NASA or community/<name>). */

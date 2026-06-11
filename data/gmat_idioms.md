@@ -141,3 +141,25 @@ This is the "idiom prompt" knowledge asset: feed it to the model so it stops gue
 
 ## Output location
 - `ReportFile` output is written to `<GMAT>\output\`, not the script directory.
+
+## Portability failures in third-party scripts (catalog from validating 49 wild scripts)
+When a downloaded/inherited script fails, it is usually the environment, not the physics.
+Triage in this order — the fix is mechanical for the first, external for the rest:
+- **Hardcoded absolute `ReportFile.Filename`** (`'C:\Users\someone\...\out.txt'` or
+  `'/home/user/.../out.txt'`) — fails with *"Cannot open report file"* on any other machine.
+  This is the #1 killer of community scripts. Fix: rewrite to a bare filename
+  (basename) and let it land in `<GMAT>\output\`. Pure mechanical fix, no physics change.
+- **Missing data assets** — a referenced SPICE kernel (`.bsp`), custom gravity file
+  (`.cof`/`.tab`), or `.bin` that *"is not an allowed value"* / *"does not exist"*. The script
+  is fine; the data file isn't shipped. Fix only by obtaining the asset; flag to the user,
+  don't invent a substitute.
+- **Missing plugins** — Optimal-control scripts (CSALT/Yukon `Optimize`, `EMTGSpacecraft`)
+  and SNOPT/VF13 optimizers need plugins enabled in the GMAT startup file. Absent → load/parse
+  error. Not a script bug.
+- **Stale syntax from old versions** — e.g. a `DifferentialCorrector.Algorithm = NewtonRson`
+  or a parameter dependency that a newer GMAT rejects (*"Invalid dependency name 'Jupiter' for
+  Parameter type 'Vinf'"*). Modernize the offending line against current docs.
+- **Template placeholders** — unsubstituted tokens like `$SMA$`/`{{value}}` left by a
+  generator (*"not an allowed value ... allowed value is Real number"*). Fill or remove.
+A script that fails only on these is still a valuable pattern reference — read it for the
+technique even if you can't run it as-is.

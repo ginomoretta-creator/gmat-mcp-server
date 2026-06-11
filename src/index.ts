@@ -7,7 +7,7 @@ import {
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { SearchEngine } from './utils/search.js';
-import { runGmat, getIdioms, listSamples, getSample } from './utils/gmat.js';
+import { runGmat, getIdioms, listSamples, listSamplesDetailed, getSample } from './utils/gmat.js';
 import { embedText } from './utils/localEmbedder.js';
 
 // Resolve data/ relative to this module (dist/) so the server works regardless of
@@ -80,7 +80,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "listGmatSamples",
-        description: "List the available known-good GMAT sample scripts: NASA's official samples plus a locally validated community corpus (real-mission scripts harvested from public repos that pass a headless run; prefixed 'community/'). Use as a retrieval corpus of working patterns per mission type.",
+        description: "List the available known-good GMAT sample scripts, each tagged with the techniques it demonstrates (targeting, optimization, finite-burn, OD/estimation, B-plane, interplanetary, libration-point, drag, attitude, ...). Covers NASA's official samples plus a locally validated community corpus (real-mission scripts harvested from public repos that pass a headless run; prefixed 'community/'). Scan the tags to pick the right seed for a mission, then getGmatSample to read it.",
         inputSchema: { type: "object", properties: {} }
       },
       {
@@ -110,8 +110,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     return { content: [{ type: "text", text: getIdioms() }] };
   }
   if (toolName === "listGmatSamples") {
-    const list = listSamples();
-    const text = list.length ? `${list.length} GMAT sample scripts:\n` + list.join("\n") : "No samples found (set GMAT_SAMPLES).";
+    const list = listSamplesDetailed();
+    if (!list.length) {
+      return { content: [{ type: "text", text: "No samples found (set GMAT_SAMPLES)." }] };
+    }
+    // Surface the technique vocabulary up front so the agent can scan for the
+    // right seed, then list each sample with its detected tags.
+    const allTags = Array.from(new Set(list.flatMap((s) => s.features))).sort();
+    const lines = list.map((s) => `${s.name}${s.features.length ? `  [${s.features.join(", ")}]` : ""}`);
+    const text =
+      `${list.length} GMAT sample scripts (NASA + validated community/). ` +
+      `Techniques present: ${allTags.join(", ")}.\n` +
+      `Pick by technique, then getGmatSample to read the full text.\n\n` +
+      lines.join("\n");
     return { content: [{ type: "text", text }] };
   }
   if (toolName === "getGmatSample") {
