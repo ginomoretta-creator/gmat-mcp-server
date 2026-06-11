@@ -1,0 +1,22 @@
+{
+  "description": "Example harvest manifest: pointers to GMAT scripts in public GitHub repos. These are references, not copies. Run `node scripts/harvest-corpus.mjs --manifest data/community-scripts/manifest.example.json --validate` to download, scan, normalize, validate headless, and index the survivors into data/community-scripts/validated/. Entries that depend on missing data files (SPICE kernels, custom gravity) or absent plugins will fail validation and be skipped — that is expected and is the point of the gate.",
+  "scripts": [
+    { "repo": "daniestevez/jupyter_notebooks", "path": "dslwp/deorbit.script" },
+    { "repo": "daniestevez/jupyter_notebooks", "path": "Tianwen/orbit/plane_change.script" },
+    { "repo": "daniestevez/jupyter_notebooks", "path": "Tianwen/orbit/comms_orbit.script" },
+    { "repo": "daniestevez/jupyter_notebooks", "path": "Tianwen/orbit/tcm3.script" },
+    { "repo": "JeremyManiago/ME_Fall_2023", "path": "ME 515/GMAT scripts/Hohmann_Transfer_Geosynchronous_Orbit.script" },
+    { "repo": "gpcolange/AAE532", "path": "HW11/Prob1_B.script" },
+    { "repo": "gpcolange/AAE532", "path": "HW10/Problem1_c.script" },
+    { "repo": "Free-Space-QKD-Lab-HWU/Qrackling", "path": "Examples/Data/orbit modelling resources/GMAT files/QKDsat100kmMultiplePass.script" },
+    { "repo": "aaronpickard/LSPACE-MCA", "path": "IceNine.script" },
+    { "repo": "deusalter/ISEF-PINN", "path": "data/gmat_scripts/44714_7day.script" },
+    { "repo": "jj95lee/Yonsei_University", "path": "dept/Astrodynamics/HW/HW2/GMAT code/Hohmann.script" },
+    { "repo": "jj95lee/Yonsei_University", "path": "dept/Astrodynamics/HW/HW6/HW6_codes-20210923T150444Z-001/gmatoption3.script" },
+    { "repo": "pimpaoz15/Orbital-Dynamics", "path": "Mission 9/Mission9_13.script" },
+    { "repo": "Smaesh/smaesh-gmat", "path": "cassini_hackathon.script" },
+    { "repo": "Zeynep-0/Venus-Orbiter-Mission", "path": "Venus orbiter.script" },
+    { "repo": "KannanThuvakaran/MSc_Project", "path": "GMAT/daybreakv2.script" },
+    { "repo": "KannanThuvakaran/MSc_Project", "path": "GMAT/daybreakv3.script" }
+  ]
+}

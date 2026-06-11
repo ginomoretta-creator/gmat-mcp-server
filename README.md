@@ -119,12 +119,46 @@ MCP client (Claude) can write → run → diagnose → fix GMAT missions autonom
   low-thrust propagations). This is the closed validation loop.
 - **`getGmatIdioms`** — returns the curated GMAT idioms/gotchas knowledge base
   (`data/gmat_idioms.md`). Read it before generating scripts to avoid common pitfalls.
-- **`listGmatSamples`** — lists the bundled NASA sample `.script` names (a retrieval corpus of
-  known-good patterns).
+- **`listGmatSamples`** — lists the bundled NASA sample `.script` names plus any validated
+  community scripts (prefixed `community/`) — a retrieval corpus of known-good patterns.
 - **`getGmatSample`** — returns one sample's full text by name, to seed a phase from a vetted template.
 
-These require a local GMAT install; see `GMAT_BIN` / `GMAT_SAMPLES` / `GMAT_IDIOMS` in
-`.env.example` (defaults match a standard GMAT R2025a install).
+These require a local GMAT install; see `GMAT_BIN` / `GMAT_SAMPLES` / `GMAT_EXTRA_SAMPLES` /
+`GMAT_IDIOMS` in `.env.example` (defaults match a standard GMAT R2025a install).
+
+### Extending the corpus (harvest pipeline)
+The retrieval corpus is extensible. `scripts/harvest-corpus.mjs` turns a manifest of public-repo
+pointers into a *validated* local corpus, using the same `runGmat` the MCP uses as the gate:
+
+```bash
+node scripts/harvest-corpus.mjs --manifest data/community-scripts/manifest.example.json --validate
+```
+
+Pipeline: **download** each script → **scan** (reject Python/MATLAB interface calls) →
+**normalize** (rewrite hardcoded absolute `ReportFile` paths — the #1 portability killer) →
+**validate** headless (keep only scripts that reach stage `completed`) → **index** each
+survivor by detected technique into `data/community-scripts/INDEX.md`.
+
+Without `--validate` it downloads, scans and normalizes only — nothing is executed.
+`--validate` runs untrusted scripts through GmatConsole, so vet the manifest and prefer a
+sandbox. The harvested scripts stay local (gitignored — licenses vary); only the pipeline and
+the example manifest of public-repo pointers are committed, so the corpus is reproducible
+without redistributing anyone's code.
+
+## Skills
+The `skills/` directory holds [Claude skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
+that teach an agent *how* to drive these tools — the procedural layer on top of the MCP's tools:
+
+- **`gmat-mission-design`** — the design-and-verify workflow: read the idioms first, seed from a
+  sample, write analytic expectations as the acceptance test, run, triage failures by `stage`,
+  and never cite a number that didn't come from a GMAT report. Benchmarked against a no-skill
+  baseline across three mission scenarios (Hohmann→GEO, electric orbit-raise, drag decay): 100%
+  vs 92% assertion pass rate, with far lower run-to-run variance.
+- **`gmat-improve`** — a run→diagnose→fix loop for *existing* scripts: baseline run as a
+  regression test, diagnosis against the failure catalog (hardcoded paths, non-ASCII, magic-number
+  burns, degenerate stop conditions), one re-run per change, before/after delivery.
+
+Point your skill-aware client at the `skills/` directory to load them.
 
 ## Data and Cache
 - Cache file: `data/embeddings.json` (or `${CACHE_DIR}/embeddings.json`)

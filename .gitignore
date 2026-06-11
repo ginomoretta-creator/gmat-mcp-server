@@ -19,6 +19,8 @@ data/models/
 
 # pnpm is the canonical package manager (pnpm-lock.yaml)
 package-lock.json
-# Skill eval workspaces and harvested community scripts (mixed licenses - do not redistribute)
+# Skill eval workspaces and harvested community scripts (mixed licenses - do not redistribute).
+# The harvest manifest (pointers to public repos) and INDEX are publishable; the scripts are not.
 skills/*-workspace/
-data/community-scripts/
+data/community-scripts/*
+!data/community-scripts/manifest.example.json

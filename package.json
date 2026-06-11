@@ -15,6 +15,7 @@
     "setup": "node dist/setup.js",
     "setup:test": "NODE_ENV=test node dist/setup.js",
     "reembed": "node dist/reembedLocal.js",
+    "harvest": "node scripts/harvest-corpus.mjs --manifest data/community-scripts/manifest.example.json",
     "test": "node test-smoke.mjs && node test-stale.mjs"
   },
   "keywords": [
