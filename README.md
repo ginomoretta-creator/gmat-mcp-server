@@ -3,7 +3,7 @@
 An MCP (Model Context Protocol) server that turns [NASA's GMAT](https://gmat.atlassian.net/wiki/spaces/GW/overview) (General Mission Analysis Tool) into a tool an AI agent can actually *use* — not just talk about. Any MCP client (Claude Code, Claude Desktop, Cursor, custom apps) gets:
 
 - **`runGmat` — the validation loop.** Runs a GMAT mission script headless via `GmatConsole` and returns a classified outcome (`completed | parse | convergence | run`) with extracted errors and report-file contents. The agent writes a script, runs it, reads what broke, and fixes it — the same loop a mission designer uses.
-- **`getGmatIdioms` — curated knowledge.** A hand-built knowledge base of GMAT gotchas discovered through that loop (cumulative `ElapsedSecs`, no parentheses in conditionals, `Propagate Synchronized` for two-spacecraft burns, …), so the agent stops making the classic mistakes.
+- **`getGmatIdioms` — curated knowledge.** A hand-built knowledge base of GMAT gotchas discovered through that loop (`ElapsedSecs` stops being relative per `Propagate`, no parentheses in conditionals, `Propagate Synchronized` for two-spacecraft burns, …), so the agent stops making the classic mistakes.
 - **`listGmatSamples` / `getGmatSample` — known-good templates.** The NASA sample-script corpus as a retrieval source for vetted mission patterns, plus an optional local corpus of community scripts (harvested from public repos, kept only if they pass a headless `runGmat` validation; listed with a `community/` prefix). The harvested corpus stays local — it is gitignored because licenses vary.
 - **`searchDocs` — semantic search over the GMAT documentation**, embedded locally and cached in `data/embeddings.json`.
 
