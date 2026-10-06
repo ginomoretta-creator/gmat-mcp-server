@@ -75,7 +75,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "getGmatIdioms",
-        description: "Return the curated GMAT idioms & gotchas knowledge base - hard-won rules that prevent common script errors (parameter dependencies, ElapsedSecs being cumulative, no parentheses in conditionals, ImpulsiveBurn vs FiniteBurn, Propagate Synchronized for two-spacecraft burns, etc.). Read this before writing GMAT scripts.",
+        description: "Return the curated GMAT idioms & gotchas knowledge base - hard-won rules that prevent common script errors (parameter dependencies, ElapsedSecs stop conditions being relative per Propagate, no parentheses in conditionals, ImpulsiveBurn vs FiniteBurn, Propagate Synchronized for two-spacecraft burns, etc.). Read this before writing GMAT scripts.",
         inputSchema: { type: "object", properties: {} }
       },
       {

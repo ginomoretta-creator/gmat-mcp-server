@@ -29,7 +29,9 @@ script you haven't re-run.
    - Non-ASCII characters (accented comments break the whole parse).
    - Hardcoded burn values that should be targeted (`Maneuver` with magic numbers and no
      `Target` block — fragile to any upstream change).
-   - Stop conditions that fail on circular orbits (apsides) or cumulative-ElapsedSecs bugs.
+   - Stop conditions that fail on circular orbits (apsides), running-total `ElapsedSecs` stops
+     (they are relative per Propagate, so a running total overshoots), or epoch stops that may
+     already be in the past (no timeout guard -> propagates forever).
    - Tight `Achieve` tolerances on osculating elements under J2.
    - GUI subscribers (`OrbitView`, `XYPlot`) in scripts meant to run headless — harmless
      in console mode but noise; keep them only if the user uses the GUI.

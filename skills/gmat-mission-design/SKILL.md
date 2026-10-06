@@ -12,7 +12,7 @@ analytic estimates are the *acceptance test* for the simulation, not the deliver
 ## The loop
 
 1. **Read the idioms first.** Call `getGmatIdioms` before writing any script. It is a curated
-   list of gotchas that each cost a failed run to discover (cumulative ElapsedSecs, ASCII-only
+   list of gotchas that each cost a failed run to discover (ElapsedSecs stop semantics, ASCII-only
    scripts, conditional syntax limits, finite-burn multi-spacecraft rules...). Skipping this
    step reliably costs more calls than it saves.
 
@@ -37,11 +37,11 @@ analytic estimates are the *acceptance test* for the simulation, not the deliver
    - `convergence` — if a Vary variable is pinned at a bound with large constant variance,
      the design is infeasible (rethink goals/bounds); otherwise widen bounds, loosen
      tolerance past physical oscillations, or pick a less degenerate goal.
-   - `run` — propagation/stop-condition failure. Classic causes: stop on an apsis of a
-     (near-)circular orbit, stop condition already satisfied (cumulative ElapsedSecs).
+   - `run` — propagation/stop-condition failure. Classic cause: stop on an apsis of a
+     (near-)circular orbit.
    - timeout — raise `timeoutSec` only when the propagation is genuinely long (multi-day
-     low-thrust spirals); otherwise suspect an infinite loop and check `raw_tail` to see
-     where it hung.
+     low-thrust spirals); otherwise suspect an infinite loop or a stop that can never trigger
+     (an epoch stop already in the past) and check `raw_tail` to see where it hung.
 
 6. **Physics-check the report against step 3.** Agreement within a few percent: report it.
    Disagreement: investigate — wrong frame, wrong dependency (`Sat.Earth.SMA` vs
@@ -67,8 +67,12 @@ analytic estimates are the *acceptance test* for the simulation, not the deliver
 
 - A circular orbit has no periapsis/apoapsis: `Propagate {Sat.Earth.Periapsis}` on ECC≈0
   dies with "Unable to interpolate a stop epoch". Burn at t=0 or use a timed stop instead.
-- `ElapsedSecs`/`ElapsedDays` are cumulative from epoch — after earlier propagates, a literal
-  duration is already satisfied. Track an accumulator variable.
+- `{Sat.ElapsedSecs = dt}` / `{Sat.ElapsedDays = dt}` stops are relative to the start of each
+  Propagate — write the plain duration, never a running total (that overshoots). The reported
+  value (Report, assignments, `If`) is cumulative; in a `While` condition it counts from loop
+  entry. For an absolute time, stop on epoch (`{Sat.A1ModJulian = tstop, Sat.ElapsedSecs =
+  tmax}`); an epoch already in the past never triggers and propagates forever without the
+  `tmax` guard.
 - Hardware quantities in `Report` are spacecraft-qualified parameters (e.g. the fuel mass of
   tank `ETank` on `Sat` is `Sat.ETank.FuelMass`); a bare `ETank.FuelMass` in a Report is a
   parse error even though assignments to `ETank.FuelMass` are fine.
